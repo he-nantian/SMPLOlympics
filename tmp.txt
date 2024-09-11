@@ -1,0 +1,12 @@
+rm /usr/local/lib/libtbbbind.so.3
+rm /usr/local/lib/libtbbbind_2_0.so.3
+rm /usr/local/lib/libtbbmalloc.so.2
+rm /usr/local/lib/libtbbmalloc_proxy.so.2
+rm /usr/local/lib/libtbbbind_2_5.so.3
+rm /usr/local/lib/libtbb.so.12
+ln -s /usr/local/lib/libtbb.so.12 /usr/local/lib/libtbb.so.12.0
+ln -s /usr/local/lib/libtbbmalloc.so.2 /usr/local/lib/libtbbmalloc.so.2.0
+ln -s /usr/local/lib/libtbbmalloc_proxy.so.2 /usr/local/lib/libtbbmalloc_proxy.so.2.0
+ln -s /usr/local/lib/libtbbbind_2_0.so.3 /usr/local/lib/libtbbbind_2_0.so.3.0
+ln -s /usr/local/lib/libtbbbind_2_5.so.3 /usr/local/lib/libtbbbind_2_5.so.3.0
+ln -s /usr/local/lib/libtbbbind.so.3 /usr/local/lib/libtbbbind.so.3.0

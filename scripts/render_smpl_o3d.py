@@ -119,23 +119,23 @@ def main():
 
     # render.scene.show_axes(True)
     img = render.render_to_image()
-    cv2.imwrite("output/renderings/iccv2023/test_data.png", np.asarray(img)[..., ::-1])
+    cv2.imwrite("output/renderings/test_data.png", np.asarray(img)[..., ::-1])
     plt.figure(dpi=400)
     plt.imshow(img)
     plt.show()
 
-    # writer = imageio.get_writer("output/renderings/test_data.mp4", fps=30, macro_block_size=None)
+    writer = imageio.get_writer("output/renderings/test_data.mp4", fps=30, macro_block_size=None)
 
-    # for i in tqdm(range(B_down)):
+    for i in tqdm(range(B_down)):
 
-    #     smpl_mesh.vertices = o3d.utility.Vector3dVector(vertices[i])
+        smpl_mesh.vertices = o3d.utility.Vector3dVector(vertices[i])
 
-    #     render.scene.remove_geometry('cyl')
-    #     render.scene.add_geometry("cyl", smpl_mesh, color)
-    #     img = render.render_to_image()
-    #     writer.append_data(np.asarray(img))
+        render.scene.remove_geometry('cyl')
+        render.scene.add_geometry("cyl", smpl_mesh, color)
+        img = render.render_to_image()
+        writer.append_data(np.asarray(img))
 
-    # writer.close()
+    writer.close()
 
 
 if __name__ == "__main__":

@@ -1,0 +1,2 @@
+apptainer shell --nv --fakeroot --writable-tmpfs ~/life/ubuntu_life.sif
+apptainer shell --nv --fakeroot --overlay ~/life/overlay.img ~/life/ubuntu_life.sif

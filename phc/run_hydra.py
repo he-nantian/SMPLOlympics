@@ -26,20 +26,30 @@
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+# print(0)
+
 import glob
 import os
 import sys
 import pdb
 import os.path as osp
 os.environ['OMP_NUM_THREADS'] = "1"
+# os.environ['WANDB_MODE'] = "dryrun"
 sys.path.append(os.getcwd())
 sys.path.append('./SMPLSim')
 
+# print(1)
+# import pdb; pdb.set_trace()
 from phc.utils.config import set_np_formatting, set_seed, SIM_TIMESTEP
-from phc.utils.parse_task import parse_task
-from isaacgym import gymapi
-from isaacgym import gymutil
+from phc.utils.parse_task import parse_task    # This line
+# print(1.5)
 
+from isaacgym import gymapi
+# print(1.6)
+from isaacgym import gymutil
+# print(1.7)
+
+# print(2)
 
 from rl_games.algos_torch import players
 from rl_games.algos_torch import torch_ext
@@ -47,12 +57,16 @@ from rl_games.common import env_configurations, experiment, vecenv
 from rl_games.common.algo_observer import AlgoObserver
 from rl_games.torch_runner import Runner
 
+# print(3)
+
 from phc.utils.flags import flags
 
 import numpy as np
 import copy
 import torch
 import wandb
+
+# print(4)
 
 from learning import im_amp
 from learning import im_amp_players
@@ -66,10 +80,14 @@ from learning import amp_network_mcp_builder
 from learning import amp_network_pnn_builder
 from learning import amp_network_z_builder
 
+# print(5)
+
 from env.tasks import humanoid_amp_task
 import hydra
 from omegaconf import DictConfig, OmegaConf
 from easydict import EasyDict
+
+# print(6)
 
 try:
     sys.path.append(os.environ.get("SUBMIT_SCRIPTS", "."))
@@ -77,6 +95,7 @@ try:
 except ModuleNotFoundError:
     AutoResume = None
     
+print("Import finished!")
 
 args = None
 cfg = None
@@ -121,9 +140,20 @@ def parse_sim_params(cfg):
     return sim_params
 
 def create_rlgpu_env(**kwargs):
+    args = EasyDict({
+        "task": cfg.env.task, 
+        "device_id": cfg.device_id,
+        "rl_device": cfg.rl_device,
+        "physics_engine": gymapi.SIM_PHYSX if not cfg.sim.use_flex else gymapi.SIM_FLEX,
+        "headless": cfg.headless,
+        "device": cfg.device,
+    }) #### ZL: patch 
+
     use_horovod = cfg_train['params']['config'].get('multi_gpu', False)
     if use_horovod:
         import horovod.torch as hvd
+
+        hvd.init()
 
         rank = hvd.rank()
         print("Horovod rank: ", rank)
@@ -138,14 +168,7 @@ def create_rlgpu_env(**kwargs):
         cfg['rl_device'] = 'cuda:' + str(rank)
     
     sim_params = parse_sim_params(cfg)
-    args = EasyDict({
-        "task": cfg.env.task, 
-        "device_id": cfg.device_id,
-        "rl_device": cfg.rl_device,
-        "physics_engine": gymapi.SIM_PHYSX if not cfg.sim.use_flex else gymapi.SIM_FLEX,
-        "headless": cfg.headless,
-        "device": cfg.device,
-    }) #### ZL: patch 
+    
     task, env = parse_task(args, cfg, cfg_train, sim_params)
 
     print(env.num_envs)
@@ -280,6 +303,9 @@ def build_alg_runner(algo_observer):
     config_name="config",
 )
 def main(cfg_hydra: DictConfig) -> None:
+
+    # print("Start running main...")
+
     global cfg_train
     global cfg
     
@@ -287,6 +313,7 @@ def main(cfg_hydra: DictConfig) -> None:
     
     set_np_formatting()
 
+    print("load_cfg")
     # cfg, cfg_train, logdir = load_cfg(args)
     flags.debug, flags.follow, flags.fixed, flags.divide_group, flags.no_collision_check, flags.fixed_path, flags.real_path,  flags.show_traj, flags.server_mode, flags.slow, flags.real_traj, flags.im_eval, flags.no_virtual_display, flags.render_o3d = \
         cfg.debug, cfg.follow, False, False, False, False, False, True, cfg.server_mode, False, False, cfg.im_eval, cfg.no_virtual_display, cfg.render_o3d
@@ -308,6 +335,7 @@ def main(cfg_hydra: DictConfig) -> None:
         flags.real_traj = True
         
         
+    # print("auto_resume")
     # auto resume
     if AutoResume is not None:
         auto_resume_details = AutoResume.get_resume_details()
@@ -320,16 +348,22 @@ def main(cfg_hydra: DictConfig) -> None:
     cfg.train = not cfg.test
     project_name = cfg.get("project_name", "egoquest")
     if (not cfg.no_log) and (not cfg.test) and (not cfg.debug):
+        # print(0)
         wandb.init(
+            # mode='offline',
+            settings=wandb.Settings(_service_wait=300),
             entity=cfg.wandb_entity,
             project=project_name,
             resume='allow',
             id=cfg.resume_str,
             notes=cfg.get("notes", "no notes"),
         )
+        # print(1)
         wandb.config.update(cfg, allow_val_change=True)
+        # print(2)
         wandb.run.name = cfg.exp_name
         wandb.run.save()
+        # print(3)
     
     set_seed(cfg.get("seed", -1), cfg.get("torch_deterministic", False))
 
@@ -367,4 +401,5 @@ def main(cfg_hydra: DictConfig) -> None:
 
 
 if __name__ == '__main__':
+    # print("enter 0")
     main()
